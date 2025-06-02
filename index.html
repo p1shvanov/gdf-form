@@ -10,6 +10,7 @@
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
   />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   </head>
   <body>
     <canvas id="binary-canvas"></canvas>
@@ -17,22 +18,23 @@
 
     <main class="content">
       <header class="header">
-        <div class="header-title">CODE OF THE FUTURE</div>
-        <div class="header-subtitle">Shaping tomorrow's code at the</div>
+        <!-- <div class="logo-container">
+          <img
+            src="logo/svg/GDF_Logo-01.svg"
+            class="logo active"
+            alt="Logo variant 1"
+          />
+          <img src="logo/svg/GDF_Logo-02.svg" class="logo" alt="Logo variant 2" />
+          <img src="logo/svg/GDF_Logo-03.svg" class="logo" alt="Logo variant 3" />
+          <img src="logo/svg/GDF_Logo-04.svg" class="logo" alt="Logo variant 4" />
+          <img src="logo/svg/GDF_Logo-05.svg" class="logo" alt="Logo variant 5" />
+          <img src="logo/svg/GDF_Logo-06.svg" class="logo" alt="Logo variant 6" />
+        </div>
+        <div class="header-text">
+          <div class="header-title">CODE OF THE FUTURE</div>
+          <div class="header-subtitle">Shaping tomorrow's code at the</div>
+        </div> -->
       </header>
-
-      <div class="logo-container">
-        <img
-          src="logo/svg/GDF_Logo-01.svg"
-          class="logo active"
-          alt="Logo variant 1"
-        />
-        <img src="logo/svg/GDF_Logo-02.svg" class="logo" alt="Logo variant 2" />
-        <img src="logo/svg/GDF_Logo-03.svg" class="logo" alt="Logo variant 3" />
-        <img src="logo/svg/GDF_Logo-04.svg" class="logo" alt="Logo variant 4" />
-        <img src="logo/svg/GDF_Logo-05.svg" class="logo" alt="Logo variant 5" />
-        <img src="logo/svg/GDF_Logo-06.svg" class="logo" alt="Logo variant 6" />
-      </div>
 
       <div class="console-container">
         <div class="terminal-header">
@@ -41,11 +43,11 @@
             <button class="terminal-button minimize" title="Minimize terminal"></button>
             <button class="terminal-button maximize" title="Maximize terminal"></button>
           </div>
-          <div class="terminal-title">gdf-terminal</div>
+          <div class="terminal-title">code_of_the_future</div>
         </div>
         <div class="terminal-content">
           <div class="terminal-history" id="terminal-history"></div>
-          <div class="terminal-input" id="terminal-input"></div>
+          <div class="terminal-input use-keyboard-input" id="terminal-input" tabindex="0"></div>
         </div>
       </div>
     </main>
