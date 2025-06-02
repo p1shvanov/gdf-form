@@ -1,0 +1,271 @@
+:root {
+  --color-white: #ffffff;
+  --color-background-dark: #0f1e28;
+  --space-unit: 1em;
+  --space-lg: calc(4 * var(--space-unit));
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  height: 100vh;
+  overflow: hidden;
+  background: var(--color-background-dark);
+  font-family: "Coolvetica", sans-serif;
+  display: flex;
+}
+
+#binary-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+#canvas-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.content {
+  flex: 1;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    "header"
+    "logo"
+    "console";
+  height: 100vh;
+  padding: var(--space-unit);
+  position: relative;
+  z-index: 1;
+}
+
+.header {
+  grid-area: header;
+  text-align: center;
+  color: var(--color-white);
+  padding-top: var(--space-lg);
+}
+
+.header-title {
+  font-size: clamp(2rem, 5vw, 4rem);
+  line-height: 1;
+  margin-bottom: 0.25em;
+}
+
+.header-subtitle {
+  font-weight: 300;
+  font-size: clamp(1rem, 2.5vw, 1.5rem);
+}
+
+.logo-container {
+  grid-area: logo;
+  position: relative;
+  width: 80%;
+  max-width: 60%;
+  padding: 200px;
+  margin: 0 auto;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo {
+  position: absolute;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+}
+
+.logo.active {
+  opacity: 1;
+}
+
+.console-container {
+  grid-area: console;
+  width: 100%;
+  max-width: 66%;
+  height: 33vh;
+  min-height: 150px;
+  color: var(--color-white);
+  font-size: 1.2rem;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+  background-color: rgba(0, 0, 0, 0.7);
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.terminal-header {
+  background-color: rgba(0, 0, 0, 0.8);
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.terminal-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.terminal-button {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: none;
+}
+
+.terminal-button.close {
+  background-color: #ff5f56;
+}
+
+.terminal-button.minimize {
+  background-color: #ffbd2e;
+}
+
+.terminal-button.maximize {
+  background-color: #27c93f;
+}
+
+.terminal-title {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  margin-left: 0.5rem;
+}
+
+.terminal-content {
+  padding: 1rem;
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.terminal-history {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+}
+
+.terminal-input {
+  position: sticky;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.terminal-line {
+  margin: 0;
+  padding: 0;
+  line-height: 1.5;
+  white-space: pre;
+}
+
+.terminal-line.typing {
+  position: relative;
+}
+
+.terminal-line.processing {
+  color: #ffbd2e;
+}
+
+.terminal-line.processing::after {
+  content: '...';
+  animation: processing 1.5s infinite;
+}
+
+@keyframes processing {
+  0% { content: '.'; }
+  33% { content: '..'; }
+  66% { content: '...'; }
+  100% { content: '.'; }
+}
+
+.terminal-prompt {
+  color: #27c93f;
+  margin-right: 0.5rem;
+}
+
+.terminal-username {
+  color: #5e2ced;
+  margin-right: 0.5rem;
+}
+
+.terminal-command {
+  color: #db6dc4;
+  font-weight: 500;
+}
+
+.terminal-output {
+  color: #4fdfb4;
+  margin-left: 1rem;
+  padding-left: 1rem;
+  border-left: 2px solid rgba(79, 223, 180, 0.3);
+  line-height: 1.6;
+}
+
+.terminal-output br {
+  margin-bottom: 0.3rem;
+}
+
+.terminal-output .checkmark {
+  color: #27c93f;
+  margin-left: 0.5rem;
+}
+
+.terminal-error {
+  color: #ff5f56;
+  margin-left: 1rem;
+  padding-left: 1rem;
+  border-left: 2px solid rgba(255, 95, 86, 0.3);
+  line-height: 1.6;
+}
+
+.terminal-generating {
+  color: #ffbd2e;
+}
+
+.terminal-generating::after {
+  content: '|';
+  animation: blink 1s step-end infinite;
+}
+
+.cursor {
+  display: inline-block;
+  width: 0.5em;
+  height: 1em;
+  background-color: var(--color-white);
+  animation: blink 1s step-end infinite;
+  margin-left: 2px;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
