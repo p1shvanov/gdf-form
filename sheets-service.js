@@ -2,7 +2,7 @@ export class SheetsService {
     // https://docs.google.com/spreadsheets/d/1pAMVawuJ3yqZ2hbJaUMX5NKIL7ggGbTaCOD-3ILTekU/edit?gid=0#gid=0
   constructor() {
     // Replace this with your Google Apps Script Web App URL
-    this.SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby3Z9aBdZlfHQ3an567xekLFWcRetjbqn-ZaGuy59X7_5J5wxQ-Poo6kKG7JkuFCT3hMg/exec';
+    this.SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw_8XlKlkUKKgPB_El1SU9cPly-A3FP2iVIn2B-0puKHmZm4Gdgit61ZRK7vNdIaCzikg/exec';
     this.queue = [];
     this.isProcessing = false;
     this.lastTimestamp = '1970-01-01T00:00:00.000Z';
