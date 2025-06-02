@@ -1,3 +1,6 @@
+import Keyboard from './keyboard.js';
+import { SheetsService } from './sheets-service.js';
+
 export class TerminalAnimation {
   constructor(targetId, words, colors) {
     this.historyTarget = document.getElementById('terminal-history');
@@ -7,13 +10,10 @@ export class TerminalAnimation {
     this.commands = [];
     this.maxCommands = 10;
     this.currentCommand = "";
-    this.letterCount = 0;
-    this.waiting = false;
     this.username = "gdf-user";
     this.commandPrefix = "$ ";
     this.isProcessing = false;
-    this.isGenerating = false;
-    this.alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    this.sheetsService = new SheetsService();
     
     this.init();
   }
@@ -21,7 +21,39 @@ export class TerminalAnimation {
   init() {
     this.historyTarget.innerHTML = "";
     this.inputTarget.innerHTML = "";
-    this.startCommandInterval();
+    this.updateTerminal();
+    
+    // Initialize keyboard
+    Keyboard.init();
+    
+    // Setup keyboard input
+    this.setupKeyboard();
+
+    // Add keyboard event listeners
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        this.submitCommand();
+      }
+    });
+  }
+
+  setupKeyboard() {
+    Keyboard.setCallbacks(
+      (value) => {
+        this.currentCommand = this.getPrompt() + value;
+        this.updateTerminal();
+      },
+      () => {
+        this.submitCommand();
+      }
+    );
+  }
+
+  submitCommand() {
+    if (this.currentCommand.trim() === this.getPrompt().trim()) {
+      return; // Don't process empty commands
+    }
+    this.processCommand(this.currentCommand);
   }
 
   getPrompt() {
@@ -32,21 +64,35 @@ export class TerminalAnimation {
     return `<span class="terminal-username">${this.username}</span>`;
   }
 
-  async generateCharacter(targetChar, currentChar) {
-    const delay = 50;
-    let attempts = 0;
-    const maxAttempts = 20;
-
-    while (attempts < maxAttempts) {
-      const randomChar = this.alphabet[Math.floor(Math.random() * this.alphabet.length)];
-      this.currentCommand = this.getPrompt() + `<span class="terminal-command">${this.words[0].substring(0, this.letterCount - 1)}${randomChar}</span>`;
-      this.updateTerminal();
-      await new Promise(resolve => setTimeout(resolve, delay));
-      attempts++;
+  async processCommand(command) {
+    // Show processing state
+    this.isProcessing = true;
+    this.updateTerminal();
+    
+    try {
+      // Extract the command text without the prompt and username
+      const commandText = command.replace(this.commandPrefix, "").trim();
+      
+      // Submit the word to Google Sheets
+      await this.sheetsService.submitWord(commandText);
+      
+      // Add both command and its output to history
+      this.commands.push(`<span class="terminal-username">${this.username}</span> ${command}`);
+      this.commands.push(`<div class="terminal-output">Word "${commandText}" submitted successfully. Waiting for moderation.</div>`);
+    } catch (error) {
+      // Add error message to history
+      this.commands.push(`<span class="terminal-username">${this.username}</span> ${command}`);
+      this.commands.push(`<div class="terminal-error">Error: Failed to submit word. Please try again later.</div>`);
     }
-
-    // Finally set the correct character
-    this.currentCommand = this.getPrompt() + `<span class="terminal-command">${this.words[0].substring(0, this.letterCount)}</span>`;
+    
+    // Remove oldest commands if we exceed the limit
+    while (this.commands.length > this.maxCommands) {
+      this.commands.shift();
+    }
+    
+    // Reset for next command
+    this.currentCommand = this.getPrompt();
+    this.isProcessing = false;
     this.updateTerminal();
   }
 
@@ -95,57 +141,6 @@ export class TerminalAnimation {
     return outputs[Math.floor(Math.random() * outputs.length)];
   }
 
-  async startCommandInterval() {
-    while (true) {
-      if (this.letterCount === 0 && !this.waiting) {
-        this.waiting = true;
-        this.currentCommand = this.getPrompt() + `<span class="terminal-command">${this.words[0].substring(0, this.letterCount)}</span>`;
-        this.updateTerminal();
-
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        const usedWord = this.words.shift();
-        this.words.push(usedWord);
-        this.letterCount = 1;
-        this.waiting = false;
-      } else if (this.letterCount === this.words[0].length + 1 && !this.waiting) {
-        this.waiting = true;
-        const fullCommand = this.currentCommand;
-        
-        // Show processing state
-        this.isProcessing = true;
-        this.updateTerminal();
-        
-        // Wait for processing to complete
-        const output = await this.simulateCommandProcessing(fullCommand);
-        
-        // Add both command and its output to history
-        this.commands.push(`<span class="terminal-username">${this.username}</span> ${fullCommand}`);
-        this.commands.push(output);
-        
-        // Remove oldest commands if we exceed the limit
-        while (this.commands.length > this.maxCommands) {
-          this.commands.shift();
-        }
-        
-        // Reset for next command
-        this.currentCommand = this.getPrompt() + `<span class="terminal-command"></span>`;
-        this.letterCount = 0;
-        this.waiting = false;
-        this.isProcessing = false;
-        this.updateTerminal();
-        
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      } else if (!this.waiting) {
-        // Generate the next character with animation
-        await this.generateCharacter(
-          this.words[0][this.letterCount],
-          this.words[0][this.letterCount - 1]
-        );
-        this.letterCount++;
-      }
-    }
-  }
-
   updateTerminal() {
     // Update history
     let historyContent = "";
@@ -158,11 +153,11 @@ export class TerminalAnimation {
     let inputClass = "terminal-line typing";
     if (this.isProcessing) {
       inputClass += " processing";
-    } else if (this.isGenerating) {
-      inputClass += " generating";
     }
     
-    this.inputTarget.innerHTML = `<div class="${inputClass}">${this.getUsername()} ${this.currentCommand}<span class="cursor">_</span></div>`;
+    // Add the command text as a separate span for better styling
+    const commandText = this.currentCommand.replace(this.commandPrefix, "");
+    this.inputTarget.innerHTML = `<div class="${inputClass}">${this.getUsername()} ${this.getPrompt()}<span class="terminal-command">${commandText}</span><span class="cursor">_</span></div>`;
     
     // Auto-scroll history to bottom
     this.historyTarget.scrollTop = this.historyTarget.scrollHeight;
